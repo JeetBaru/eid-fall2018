@@ -8,6 +8,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+import Adafruit_DHT
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -47,8 +49,10 @@ class Ui_Dialog(object):
         self.pushButton_3.clicked.connect(self.egjit)
 
     def displayValue(self):
-        self.label_3.setText("Jeet")
-        self.label_4.setText("Baru")
+        humidity, temperature = Adafruit_DHT.read_retry(22,4)
+        if humidity is not None and temperature is not None:
+            self.label_3.setText(str(temperature) + "C")
+            self.label_4.setText(str(humidity) + "%" ) 
 
     def egjit(self):
         exit()
