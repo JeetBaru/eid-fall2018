@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QDialog, QApplication
-from monitor import Ui_Dialog
+from monitorv3 import Ui_Dialog
 
 class AppWindow(QDialog):
     def __init__(self):
