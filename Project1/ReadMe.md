@@ -9,8 +9,9 @@ python3 temphum.py
 
 Project Work:
 This Application is a GUI that monitots temperature and humidity sensed using Adafruit DHT22 and Raspberry Pi3.
-The data pin of the sensor is connected to GPIO pin 4. The GUI displays recoreded temperature and humidity. It also
-displays timestamp of last time the temp and humidity were refreshed.
+The data pin of the sensor is connected to GPIO pin 4. The GUI displays recorded temperature and humidity. It also
+displays timestamp of last time the temp and humidity were refreshed. The application also handels sensor not being
+connected by displaying the status of the sensor.
 
 Project Additions:
 Additional Features implemented:
