@@ -82,5 +82,5 @@ var iid = setInterval(function() {
 	console.log(`Average Temeperature: ${(totaltemp/repeats).toFixed(1)}`)
 	console.log(`Average Humidity: ${(totalhum/repeats).toFixed(1)}`)
   }	
-}, 2500);
+}, 1000);
 
