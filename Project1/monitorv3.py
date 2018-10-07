@@ -6,6 +6,19 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+#Filename: monitor3.py
+#
+#Function: This file is generated from UI file in the folder using pyQT
+#          It contains initialization of UI modules and logic of callback 
+#          functions for button presses and other user interactions
+#          The application list temp and humidity when requested with timestamp
+#          Giving users a graphical representation and ability to set alerts
+#
+#Notes: Find Usage, install notes in ReadMe
+#
+#Author: Jeet Baru
+#
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 import Adafruit_DHT
 import datetime
@@ -13,11 +26,13 @@ import numpy
 import time
 import matplotlib.pyplot as plt
 
+#Initialize arrays to store data
 temp = [0] * 100
 hum = [0] * 100
 timestp = [0] * 100
-count = 0
+count = 0 #To count number of values recorded
 
+#initialize UI elements
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -117,10 +132,27 @@ class Ui_Dialog(object):
         self.HumLowLimit.valueChanged.connect(self.valuechange)
         self.HumHighLimit.valueChanged.connect(self.valuechange)
 
+    #callback function for change in value of temp/hum spinbox
+    #spinbox is used to take user input for settng alert values
     def valuechange(self):
         if count > 0:
-            self.TempBar.setValue((temp[count-1]-self.TempLowLimit.value())/(0.01*(self.TempHighLimit.value()-self.TempLowLimit.value())))
-            self.HumBar.setValue((hum[count-1]-self.HumLowLimit.value())/(0.01*(self.HumHighLimit.value()-self.HumLowLimit.value())))
+			#update value for bar representation
+            if temp[count-1] > self.TempHighLimit.value():
+                self.TempBar.setValue(100)
+            elif temp[count-1] < self.TempLowLimit.value():
+                self.TempBar.setValue(0)
+            else:
+                self.TempBar.setValue((temp[count-1]-self.TempLowLimit.value())/(0.01*(self.TempHighLimit.value()-self.TempLowLimit.value())))
+            
+            #update value for bar representation
+            if hum[count-1] > self.HumHighLimit.value():
+                self.HumBar.setValue(100)
+            elif hum[count-1] < self.HumLowLimit.value():
+                self.HumBar.setValue(0)
+            else:
+                self.HumBar.setValue((hum[count-1]-self.HumLowLimit.value())/(0.01*(self.HumHighLimit.value()-self.HumLowLimit.value())))
+            
+            #display alert if present
             if temp[count-1] > self.TempHighLimit.value():
                 self.label.setText('Temp Too High!')
             elif temp[count-1] < self.TempLowLimit.value():
@@ -132,20 +164,26 @@ class Ui_Dialog(object):
             else:
                 self.label.setText('    No Alert!')		
 
+	#internal utility function to calculate mean of n numbers in a list
     def mean(self, arr, l):
         return sum(arr)/(l+1)
     
+    #callback function for refresh button press
     def refresh(self):
         global temp
         global hum
         global timestp
         global count
 
+		#read temperature
         temp[count],hum[count] = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22,4)
 
         if temp[count] is not None and hum[count] is not None:
+            
+            #calculate averages
             avgtemp = self.mean(temp,count)
             avghum = self.mean(hum,count)
+            #update window labels with status, timestamp and values
             self.ConnStatus.setText('    Sensor Connected')
             self.TimeStamp.setText(datetime.datetime.now().strftime("%H:%M %d-%m-%y"))
             timestp[count] = time.time()
@@ -153,8 +191,23 @@ class Ui_Dialog(object):
             self.CurrHumVal.setText('Curr: ' + '{0:0.2f}%'.format(hum[count]))
             self.AvgTempVal.setText('Avg: ' + '{0:0.2f} C'.format(avgtemp))
             self.AvgHumVal.setText('Avg: ' + '{0:0.2f}%'.format(avghum))
-            self.TempBar.setValue((temp[count]-self.TempLowLimit.value())/(0.01*(self.TempHighLimit.value()-self.TempLowLimit.value())))
-            self.HumBar.setValue((hum[count]-self.HumLowLimit.value())/(0.01*(self.HumHighLimit.value()-self.HumLowLimit.value())))
+            
+            #update value for bar representation
+            if temp[count] > self.TempHighLimit.value():
+                self.TempBar.setValue(100)
+            elif temp[count] < self.TempLowLimit.value():
+                self.TempBar.setValue(0)
+            else:
+                self.TempBar.setValue((temp[count]-self.TempLowLimit.value())/(0.01*(self.TempHighLimit.value()-self.TempLowLimit.value())))
+            #update value for bar representation
+            if hum[count] > self.HumHighLimit.value():
+                self.HumBar.setValue(100)
+            elif hum[count] < self.HumLowLimit.value():
+                self.HumBar.setValue(0)
+            else:
+                self.HumBar.setValue((hum[count]-self.HumLowLimit.value())/(0.01*(self.HumHighLimit.value()-self.HumLowLimit.value())))
+            
+            #set alert if necessary
             if temp[count] > self.TempHighLimit.value():
                 self.label.setText('Temp Too High!')
             elif temp[count] < self.TempLowLimit.value():
@@ -166,6 +219,7 @@ class Ui_Dialog(object):
             else:
                 self.label.setText('    No Alert!')
 
+			#if max count reached reset values
             count = count + 1
             if count == 99:
                 count = 0
@@ -175,10 +229,11 @@ class Ui_Dialog(object):
         else:
             self.ConnStatus.setText('Sensor Not Connected')
 
-    
+    #callback function for quit button press
     def quit(self):
         exit()
 
+	#callback function for graph button press
     def graph(self):
          
         global temp
@@ -187,14 +242,16 @@ class Ui_Dialog(object):
         global count
         
         if count is not 0: 
-
+			#generate avg temp and hum arrays
             avgtemparr = [self.mean(temp,count)] * count
             avghumarr = [self.mean(hum,count)] * count          
 
+			#plot temp array and avg value
             plt.subplot(2,1,1)
             plt.plot(timestp[0:(count-1)],temp[0:(count-1)])
             plt.plot(timestp[0:(count-1)],avgtemparr[0:(count-1)])
 
+			#plot hum array and avg value
             plt.subplot(2,1,2)
             plt.plot(timestp[0:(count-1)],hum[0:(count-1)])
             plt.plot(timestp[0:(count-1)],avghumarr[0:(count-1)])
